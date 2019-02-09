@@ -6,8 +6,7 @@
 #include <list>
 #include <fstream>
 #include <cstddef>
-#include <set>
-#include <vector>
+#include "storage.h"
 
 using write_sequence = std::list<std::string>;
 using read_sequence = std::list<std::pair<uint64_t, std::string>>;
@@ -22,7 +21,7 @@ uint64_t get_time()
 
 write_sequence get_write_sequence()
 {
-    std::ifstream infile("insert.txt");
+    std::ifstream infile("../resources/insert.txt");
     write_sequence result;
     
     std::string item;
@@ -37,7 +36,7 @@ write_sequence get_write_sequence()
 
 read_sequence get_read_sequence()
 {
-    std::ifstream infile("read.txt");
+    std::ifstream infile("../resources/read.txt");
     read_sequence result;
     
     uint64_t index;
@@ -51,27 +50,14 @@ read_sequence get_read_sequence()
     return result;
 }
 
-class storage
-{
-public:
-    void insert(const std::string &str)
-    {
-        //TODO insert str with sorting
-    }
-    const std::string &get(uint64_t index)
-    {
-        //TODO return string via index
-        return _val;
-    }
-    std::string _val;
-};
-
 void test(const write_sequence &write, const read_sequence &read)
 {
-    storage st;
+    storage st(1000);
     
     uint64_t timestamp_us;
     uint64_t total_time = 0;
+    uint64_t insert_time = 0;
+    uint64_t extract_time = 0;
     
     write_sequence::const_iterator iitr = write.begin();
     read_sequence::const_iterator ritr = read.begin();
@@ -79,11 +65,15 @@ void test(const write_sequence &write, const read_sequence &read)
     {
         timestamp_us = get_time();
         st.insert(*iitr);
-        total_time += get_time() - timestamp_us;
+        timestamp_us = get_time() - timestamp_us;
+        total_time += timestamp_us;
+        insert_time += timestamp_us;
         
         timestamp_us = get_time();
         const std::string &str = st.get(ritr->first);
-        total_time += get_time() - timestamp_us;
+        timestamp_us = get_time() - timestamp_us;
+        total_time += timestamp_us;
+        extract_time += timestamp_us;
         
         if (ritr->second != str)
         {
@@ -96,6 +86,8 @@ void test(const write_sequence &write, const read_sequence &read)
     }
     
     std::cout << "total time: " << total_time << std::endl;
+    std::cout << "insert time: " << insert_time << std::endl;
+    std::cout << "extract time: " << extract_time << std::endl;
 }
 
 

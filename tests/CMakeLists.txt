@@ -11,4 +11,4 @@ macro(package_add_test TESTNAME)
     set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
 endmacro()
 
-package_add_test(unit_tests unit_tests.cpp)
+package_add_test(storage_tests storage_tests.cpp ${SOURCE_DIR}/storage.cpp)
