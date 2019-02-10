@@ -23,34 +23,44 @@ void storage::insert(const std::string &str)
                                                     {
                                                         return *it1 < *it2;
                                                     });
-        if (firstGreaterThanStr != _hints.end()) {
-            for (auto it = firstGreaterThanStr; it != _hints.end(); ++it)
-            {
-                *it = --(*it);
-            }
-        }
+        for (auto it = firstGreaterThanStr; it != _hints.end(); ++it)
+            *it = --(*it);
         
         if (_myset.size()%_blockSize == 0)
-        {
             _hints.push_back(--(_myset.end()));
-        }
     }
 }
 
-const std::string & storage::get(uint64_t index)
+const std::string & storage::get(std::size_t index) const
 {
     //TODO return string via index
-    const auto hintIndex = index/_blockSize;
-    if (hintIndex != 0)
+    std::size_t stepCount;
+    HintType startIt;
+    if (isForward(index, stepCount, startIt))
+        return *std::next(startIt, stepCount);
+    else
+        return *std::prev(startIt, stepCount);
+}
+
+bool storage::isForward(std::size_t index, std::size_t & stepCount, HintType & startIt) const
+{
+    const std::size_t hintIndex = index/_blockSize;
+    const std::size_t left = (hintIndex > 0) ? hintIndex*_blockSize-1 : 0;
+    const std::size_t right = ((hintIndex+1)*_blockSize-1 < _myset.size()) ? (hintIndex+1)*_blockSize-1 : _myset.size()-1;
+    
+    const auto fromLeft = index-left;
+    const auto fromRight = right-index;
+    std::string retVal;
+    if (fromLeft < fromRight)
     {
-        const auto offsetAfterHint = index%_blockSize+1;
-        auto val = std::next(_hints[hintIndex-1], offsetAfterHint);
-        return *val;
+        stepCount = fromLeft;
+        startIt = (hintIndex > 0) ? _hints[hintIndex-1] : _myset.begin();
+        return true;
     }
     else
     {
-        const auto offsetAfterHint = index%_blockSize;
-        auto val = std::next(_myset.begin(), offsetAfterHint);
-        return *val;
+        stepCount = fromRight;
+        startIt = (_myset.size()-1 != right) ? _hints[hintIndex] : std::prev(_myset.end());
+        return false;
     }
 }

@@ -14,12 +14,19 @@
 
 class storage
 {
+    friend class StorageTest;
 public:
     storage(std::size_t blockSize = 1000);
     void insert(const std::string &str);
-    const std::string &get(uint64_t index);
+    const std::string &get(std::size_t index) const;
+    std::size_t getBlockSize() const
+    {
+        return _blockSize;
+    }
 private:
     using HintType = std::set<std::string>::iterator;
+    bool isForward(std::size_t index, std::size_t & stepCount, HintType & startIt) const;
+    
     std::set<std::string> _myset;
     std::vector<HintType> _hints;
     std::size_t _blockSize;
