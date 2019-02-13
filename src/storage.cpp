@@ -7,10 +7,17 @@
 
 #include "storage.h"
 #include <iostream>
+#include <thread>
 
 storage::storage(std::size_t blockSize):_blockSize(blockSize)
 {
-    
+    _vec.reserve(std::thread::hardware_concurrency());
+}
+
+void storage::altIterators(std::vector<HintType>::iterator first, std::vector<HintType>::iterator last)
+{
+    for (auto it = first; it != last; ++it)
+        *it = --(*it);
 }
 
 void storage::insert(const std::string &str)
@@ -23,8 +30,53 @@ void storage::insert(const std::string &str)
                                                     {
                                                         return *it1 < *it2;
                                                     });
-        for (auto it = firstGreaterThanStr; it != _hints.end(); ++it)
-            *it = --(*it);
+        
+#ifdef SINGLE_THREAD
+//        for (auto it = firstGreaterThanStr; it != _hints.end(); ++it)
+//            *it = --(*it);
+        
+        if (firstGreaterThanStr != _hints.end()) {
+            
+            const std::size_t countToProcess = std::distance(firstGreaterThanStr, _hints.end());
+            //if (countToProcess >= 32)
+            {
+                const auto maxThreadCount = 8;//std::thread::hardware_concurrency();
+                
+                const std::size_t wholeCount = countToProcess/maxThreadCount;
+                const std::size_t restCount = countToProcess%maxThreadCount;
+                
+                const std::size_t threadCountToCreate = (wholeCount > 0) ? maxThreadCount : restCount;
+                
+                std::vector<HintType>::iterator lastIt = firstGreaterThanStr;
+                
+                for (int i = 0; i < threadCountToCreate; ++i)
+                {
+                    auto firstIt = lastIt;
+                    const std::size_t count = wholeCount+((i < restCount)?1:0);
+                    lastIt = std::next(firstIt, count);
+                    _vec.push_back({firstIt, lastIt});
+                }
+                _group.run([this](){
+                    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, _vec.size()), [this](const tbb::blocked_range<std::size_t> &r){
+                        for (size_t i = r.begin(); i != r.end(); ++i)
+                        {
+                            auto lastIt = _vec[i].second;
+                            for (auto it = _vec[i].first; it != lastIt; ++it)
+                                *it = --(*it);
+                        }
+                    });
+                });
+                
+                _group.wait();
+                _vec.clear();
+            }
+//            else {
+//                for (auto it = firstGreaterThanStr; it != _hints.end(); ++it)
+//                    *it = --(*it);
+//            }
+        }
+#endif
+
         
         if (_myset.size()%_blockSize == 0)
             _hints.push_back(--(_myset.end()));

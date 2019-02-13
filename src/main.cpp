@@ -52,12 +52,16 @@ read_sequence get_read_sequence()
 
 void test(const write_sequence &write, const read_sequence &read)
 {
-    storage st(1000);
+    const std::size_t blockSize = 750;
+    storage st(blockSize);
     
     uint64_t timestamp_us;
     uint64_t total_time = 0;
     uint64_t insert_time = 0;
     uint64_t extract_time = 0;
+    
+    int k = 0;
+    //int target100 = 3;
     
     write_sequence::const_iterator iitr = write.begin();
     read_sequence::const_iterator ritr = read.begin();
@@ -68,18 +72,23 @@ void test(const write_sequence &write, const read_sequence &read)
         timestamp_us = get_time() - timestamp_us;
         total_time += timestamp_us;
         insert_time += timestamp_us;
-        
+
         timestamp_us = get_time();
         const std::string &str = st.get(ritr->first);
         timestamp_us = get_time() - timestamp_us;
         total_time += timestamp_us;
         extract_time += timestamp_us;
         
+        ++k;
+        
         if (ritr->second != str)
         {
-            std::cout << "test failed" << std::endl;
+            std::cout << "test failed:" << k << std::endl;
             return;
         }
+        
+        if (k == 100000)
+            break;
         
         iitr++;
         ritr++;
