@@ -11,25 +11,22 @@
 #include <vector>
 #include <set>
 #include <string>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+
+namespace pbds = __gnu_pbds;
 
 class storage
 {
-    friend class StorageTest;
 public:
-    storage(std::size_t blockSize = 1000);
+    storage();
     void insert(const std::string &str);
     const std::string &get(std::size_t index) const;
-    std::size_t getBlockSize() const
-    {
-        return _blockSize;
-    }
-private:
-    using HintType = std::set<std::string>::iterator;
-    bool isForward(std::size_t index, std::size_t & stepCount, HintType & startIt) const;
     
-    std::set<std::string> _myset;
-    std::vector<HintType> _hints;
-    std::size_t _blockSize;
+private:
+    using ordered_set = pbds::tree<std::string, pbds::null_type, std::less<std::string>, pbds::rb_tree_tag, pbds::tree_order_statistics_node_update>;
+    
+    ordered_set _myset;
 };
 
 #endif /* storage_h */

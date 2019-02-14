@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION ${cmake_version})
 
 set(AppName "fastmap")
 
+set(CMAKE_C_COMPILER "/usr/local/Cellar/gcc/8.2.0/bin/gcc-8")
+set(CMAKE_CXX_COMPILER "/usr/local/Cellar/gcc/8.2.0/bin/g++-8")
+
 project(${AppName} 
 		VERSION 1.0.0.0
 		LANGUAGES CXX)
@@ -14,7 +17,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O3 -DNDEBUG -fPIC -Wall")
-#set(CMAKE_BUILD_TYPE Debug)
 
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 set(HEADERS 
