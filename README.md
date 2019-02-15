@@ -4,15 +4,15 @@ Git user attention
 
 1. Clone the repo from GitHub.
 
-	$ git clone https://github.com/rokoDev/TestTask.git
+         $ git clone https://github.com/rokoDev/TestTask.git
 
 2. Open cloned directory in step 1.
 
-	$ cd TestTask
+         $ cd TestTask
 
 3. Update submodules.
 
-	$ git submodule update --init --recursive
+         $ git submodule update --init --recursive
 
 4. Open CMakeLists.txt and set valid paths to GNU compiler
 
@@ -21,15 +21,15 @@ Git user attention
 
 5. Create build directory.
 
-	$ mkdir build
+         $ mkdir build
 
 6. Open build directory.
 
-	$ cd build
+         $ cd build
 
 7. Build program
 
-	$ cmake .. && make
+         $ cmake .. && make
 
 # TestTask
 
